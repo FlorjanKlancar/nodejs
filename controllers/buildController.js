@@ -162,10 +162,16 @@ const postBuilding = async (req, res, next) => {
 
   console.log("endBuildTime", endBuildTime);
 
-  const job = schedule.scheduleJob(buildingName, endBuildTime, function () {
-    console.log("Execute update!", dayjs().toDate());
+  const job = schedule.scheduleJob(
+    buildingName,
+    endBuildTime,
+    async function () {
+      console.log("Execute update!", dayjs().toDate());
 
-    /*     const docRef = db.collection("village").doc(villageId);
+      village.currentlyBuilding = [];
+
+      await village.save();
+      /*     const docRef = db.collection("village").doc(villageId);
 
     docRef.update({
       currentlyBuilding: [],
@@ -181,7 +187,8 @@ const postBuilding = async (req, res, next) => {
               villageObject[0][`${buildingNamePrefix[0]}ProductionPerH`],
           }),
     }); */
-  });
+    }
+  );
 
   return res
     .status(StatusCodes.OK)
