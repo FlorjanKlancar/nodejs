@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import {StatusCodes} from "http-status-codes";
 import schedule from "node-schedule";
 import BadRequestError from "../errors/bad-request.js";
+import Village from "../models/Village.js";
 import {getBuildingById} from "./gsBuildingsController.js";
 import {getVillageById} from "./villageController.js";
 
@@ -11,8 +12,6 @@ const postBuilding = async (req, res, next) => {
   const fieldId = req.body.fieldId;
   const isBuilding = req.body.isBuilding;
   const cancleJob = req.body.cancleJob;
-
-  console.log("req.body", req.body);
 
   /*      const docRef = db.collection("village").doc(villageId);
   
@@ -101,6 +100,7 @@ const postBuilding = async (req, res, next) => {
   const endBuildTime = dayjs().add(buildingBuildTime, "s").toDate();
   const timenow = dayjs().toDate();
   console.log("timenow", timenow);
+  console.log("buildingBuildTime", buildingBuildTime);
 
   let updatedObject = {};
 
@@ -146,17 +146,18 @@ const postBuilding = async (req, res, next) => {
 
   const buildingNamePrefix = buildingName.split("_");
 
-  /*   docRef.update({
-    currentlyBuilding: [
-      {
-        buildingId: buildingName,
-        currentlyBuildingLevel: getBuildingCurrentLevel.level + 1,
-        fieldId,
-        endBuildTime,
-      },
-    ],
-    resourcesStorage: resourcesStorageMinus,
-  }); */
+  const village = await Village.findOne({_id: villageId});
+  village.currentlyBuilding = [
+    {
+      buildingId: buildingName,
+      currentlyBuildingLevel: getBuildingCurrentLevel.level + 1,
+      fieldId: fieldId,
+      endBuildTime: endBuildTime,
+    },
+  ];
+
+  await village.save();
+
   console.log("Added currently building and reduced resources!");
 
   console.log("endBuildTime", endBuildTime);
