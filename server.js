@@ -4,14 +4,12 @@ import "express-async-errors";
 import errorHandlerMiddleware from "./middleware/error-handler.js";
 import notFoundMiddleware from "./middleware/not-found.js";
 import dotenv from "dotenv";
-import authRouter from "./routes/authRoutes.js";
-import villageRouter from "./routes/villageRoutes.js";
 import gsBuildingsRouter from "./routes/gsBuildingsRoutes.js";
-import charactersRouter from "./routes/characterRoutes.js";
-import locationRouter from "./routes/locationRoutes.js";
+import initRouter from "./routes/initRoutes.js";
+import gsUnitsRouter from "./routes/gsUnitsRoutes.js";
+import villageRouter from "./routes/villageRoutes.js";
 import buildRouter from "./routes/buildRoutes.js";
 import connectDb from "./db/connect.js";
-import path from "path";
 
 dotenv.config();
 
@@ -23,12 +21,11 @@ app.get("/", (req, res) => {
   res.send("Welcome from nodejss!");
 });
 
-app.use("/uploads/images", express.static(path.join("uploads", "images")));
-
-app.use("/api/user", authRouter);
-app.use("/api/characters", charactersRouter);
-app.use("/api/locations", locationRouter);
+app.use("/api/gsBuildings", gsBuildingsRouter);
+app.use("/api/gsUnits", gsUnitsRouter);
+app.use("/api/village", villageRouter);
 app.use("/api/build", buildRouter);
+app.use("/api/init", initRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

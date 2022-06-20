@@ -6,4 +6,11 @@ const getBuildingById = async (buildingId) => {
 
   return response;
 };
-export {getBuildingById};
+
+const getBuildingsEndpoint = async (req, res, next) => {
+  const response = await Building.find({});
+
+  return res.status(StatusCodes.OK).json(response);
+};
+
+export {getBuildingById, getBuildingsEndpoint};

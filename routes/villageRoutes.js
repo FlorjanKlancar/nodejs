@@ -1,14 +1,10 @@
 import express from "express";
 
-import {
-  getAllVillages,
-  getVillageById,
-} from "../controllers/villageController.js";
+import {endpointGetVillageById} from "../controllers/villageController.js";
 import authenticateUser from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.route("/").get(getAllVillages);
-router.route("/:id").get(getVillageById);
+router.route("/:id").get(endpointGetVillageById);
 
 export default router;
