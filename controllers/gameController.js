@@ -26,12 +26,12 @@ async function updateResourcesToDate(villageObject, villageId) {
   const granaryAllLevels = await getBuildingById("warehouse");
 
   const warehouseMaxResourcesForCurrentLevel = findWarehouseInVillage
-    ? warehouseAllLevels[0].levels[0][`${findWarehouseInVillage.level}`]
+    ? warehouseAllLevels.levels[0][`${findWarehouseInVillage.level}`]
         .warehouseResourceLimit
     : 800;
 
   const granaryMaxResourcesForCurrentLevel = findGranaryInVillage
-    ? granaryAllLevels[0].levels[0][`${findGranaryInVillage.level}`]
+    ? granaryAllLevels.levels[0][`${findGranaryInVillage.level}`]
         .warehouseResourceLimit
     : 800;
 

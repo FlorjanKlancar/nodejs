@@ -1,8 +1,8 @@
-import {StatusCodes} from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import Building from "../models/Building.js";
 
 const getBuildingById = async (buildingId) => {
-  const response = await Building.find({type: buildingId});
+  const response = await Building.findOne({ type: buildingId });
 
   return response;
 };
@@ -13,4 +13,4 @@ const getBuildingsEndpoint = async (req, res, next) => {
   return res.status(StatusCodes.OK).json(response);
 };
 
-export {getBuildingById, getBuildingsEndpoint};
+export { getBuildingById, getBuildingsEndpoint };

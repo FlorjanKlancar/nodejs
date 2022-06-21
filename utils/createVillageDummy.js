@@ -64,22 +64,17 @@ const newVillage = {
     {
       gridPosition: 5,
       id: 6,
-      level: 1,
-      type: "iron_field",
-      description:
-        "From the depths of the earth, different metals are extracted to make armors, weapons and tools.",
+      type: "village_center",
       imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/iron_level_1.png?alt=media&token=d9858602-cc0d-412b-b3f2-2bb7e96352e3",
+        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/1.png?alt=media&token=a5d97459-e63c-467f-81c0-5bad339feae5",
     },
     {
       gridPosition: 6,
       id: 7,
       level: 1,
-      type: "wood_field",
-      description:
-        "Forests are made for man to transform the trees into buildings, furniture and machines for war.",
+      type: "village_center",
       imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/wood_level_1.png?alt=media&token=9f0e9136-e913-43e1-934a-7642b0b4b5fa",
+        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/2.png?alt=media&token=da17d6ad-82a8-49ca-bd38-39d10ad5de66",
     },
     {
       gridPosition: 7,
@@ -104,22 +99,17 @@ const newVillage = {
     {
       gridPosition: 9,
       id: 10,
-      level: 1,
-      type: "wheat_field",
-      description:
-        "All armies move at the speed of their stomachs, and all powerful nations require high amounts of food, this farm ensures that.",
+      type: "village_center",
       imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/wheat_level_1.png?alt=media&token=e5c2d4a5-e072-4967-9ee1-9fe6812c142e",
+        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/3.png?alt=media&token=2417d269-06fd-4ecd-b84b-3486a5b6435d",
     },
     {
       gridPosition: 10,
       id: 11,
       level: 1,
-      type: "wood_field",
-      description:
-        "Forests are made for man to transform the trees into buildings, furniture and machines for war.",
+      type: "village_center",
       imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/wood_level_1.png?alt=media&token=9f0e9136-e913-43e1-934a-7642b0b4b5fa",
+        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/4.png?alt=media&token=d20a6b45-cb9f-4d43-a077-5c4e0da42a9a",
     },
     {
       gridPosition: 11,
@@ -171,46 +161,6 @@ const newVillage = {
       imageGrid:
         "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/wood_level_1.png?alt=media&token=9f0e9136-e913-43e1-934a-7642b0b4b5fa",
     },
-    {
-      gridPosition: 16,
-      id: 17,
-      level: 1,
-      type: "clay_field",
-      description:
-        "It processes clay from nearby mud to later be used for construction.",
-      imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/clay_level_1.png?alt=media&token=8454ebc4-9bb3-4f19-a080-87ff44980f4e",
-    },
-    {
-      gridPosition: 17,
-      id: 18,
-      level: 1,
-      type: "clay_field",
-      description:
-        "It processes clay from nearby mud to later be used for construction.",
-      imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/clay_level_1.png?alt=media&token=8454ebc4-9bb3-4f19-a080-87ff44980f4e",
-    },
-    {
-      gridPosition: 18,
-      id: 19,
-      level: 1,
-      type: "iron_field",
-      description:
-        "From the depths of the earth, different metals are extracted to make armors, weapons and tools.",
-      imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/iron_level_1.png?alt=media&token=d9858602-cc0d-412b-b3f2-2bb7e96352e3",
-    },
-    {
-      gridPosition: 19,
-      id: 20,
-      level: 1,
-      type: "iron_field",
-      description:
-        "From the depths of the earth, different metals are extracted to make armors, weapons and tools.",
-      imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/iron_level_1.png?alt=media&token=d9858602-cc0d-412b-b3f2-2bb7e96352e3",
-    },
   ],
   villageBuildings: [
     {
@@ -239,7 +189,7 @@ const newVillage = {
       description:
         "On the halls of this building, normal citizens become warriors, ready to serve their lords and lands.",
       imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/vojasnica.png?alt=media&token=4aa41cf7-ac2e-45de-ae03-6e34704882c7",
+        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/barracks.png?alt=media&token=fd3b5b3f-b899-495f-a25b-efaf622b8c11",
     },
     {
       gridPosition: 3,
@@ -267,7 +217,7 @@ const newVillage = {
       description:
         "The granary is where the seeds for the new season of growth are safely stored.",
       imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/zitnica.png?alt=media&token=42bcf843-1fcd-491b-b999-47470a112aac",
+        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/granary.png?alt=media&token=b298ae5e-75fa-4968-a5e0-9304a82731c0",
     },
     {
       gridPosition: 6,
@@ -313,7 +263,7 @@ const newVillage = {
       description:
         "In this building, the spoils of war, the harvest of the season, the riches mined from the earth and the hand made craft are safely stored.",
       imageGrid:
-        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/skladisce.png?alt=media&token=23b1c22a-c5fc-4324-8e05-7e556e13d254",
+        "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/warehouse.png?alt=media&token=770ea3b4-d6c4-493d-9431-44acea237829",
     },
     {
       gridPosition: 11,
@@ -366,6 +316,4 @@ const newVillage = {
   population: 28,
 };
 
-module.exports = {
-  newVillage: newVillage,
-};
+export { newVillage };
