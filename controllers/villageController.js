@@ -41,7 +41,7 @@ const createVillage = async (req, res) => {
 };
 
 const getVillageById = async (villageId) => {
-  const response = await Village.find({ _id: villageId });
+  const response = await Village.findOne({ userId: villageId });
 
   return response;
 };

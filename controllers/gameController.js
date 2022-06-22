@@ -1,4 +1,4 @@
-import {getBuildingById} from "./gsBuildingsController.js";
+import { getBuildingById } from "./gsBuildingsController.js";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration.js";
 import Village from "../models/Village.js";
@@ -70,7 +70,7 @@ async function updateResourcesToDate(villageObject, villageId) {
         : wheatCalculation,
   };
 
-  const village = await Village.findOne({_id: villageId});
+  const village = await Village.findOne({ _id: villageId });
   village.resourcesStorage = updateStorageWith;
   village.save();
 
@@ -79,4 +79,4 @@ async function updateResourcesToDate(villageObject, villageId) {
   return updateStorageWith;
 }
 
-export {updateResourcesToDate};
+export { updateResourcesToDate };

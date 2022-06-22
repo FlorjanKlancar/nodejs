@@ -1,15 +1,16 @@
-import {StatusCodes} from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import Building from "../models/Building.js";
 import Rank from "../models/Rank.js";
 import Unit from "../models/Unit.js";
-import {createBuildings} from "../utils/createBuildings.js";
-import {createRankings} from "../utils/createRankings.js";
-import {createUnits} from "../utils/createUnits.js";
+import { createBuildings } from "../utils/createBuildings.js";
+import { createRankings } from "../utils/createRankings.js";
+import { createUnits } from "../utils/createUnits.js";
 
 const initController = async (req, res) => {
   createBuildings.forEach(async (item) => {
     const building = new Building({
       type: item.type,
+      name: item.name,
       description: item.description,
       image: item.image,
       levels: item.levels,
@@ -51,4 +52,4 @@ const initController = async (req, res) => {
   res.status(StatusCodes.OK).json("response");
 };
 
-export {initController};
+export { initController };

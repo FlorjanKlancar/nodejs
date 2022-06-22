@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
-import {StatusCodes} from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import schedule from "node-schedule";
 import BadRequestError from "../errors/bad-request.js";
 import Village from "../models/Village.js";
-import {updateResourcesToDate} from "./gameController.js";
-import {getBuildingById} from "./gsBuildingsController.js";
-import {getVillageById} from "./villageController.js";
+import { updateResourcesToDate } from "./gameController.js";
+import { getBuildingById } from "./gsBuildingsController.js";
+import { getVillageById } from "./villageController.js";
 
 const postBuilding = async (req, res, next) => {
   const villageId = req.body.villageId;
@@ -14,7 +14,7 @@ const postBuilding = async (req, res, next) => {
   const isBuilding = req.body.isBuilding;
   const cancleJob = req.body.cancleJob;
 
-  const village = await Village.findOne({_id: villageId});
+  const village = await Village.findOne({ userId: villageId });
 
   if (cancleJob && Object.keys(schedule.scheduledJobs).length !== 0) {
     var my_job = schedule.scheduledJobs[buildingName];
@@ -24,7 +24,9 @@ const postBuilding = async (req, res, next) => {
     village.currentlyBuilding = [];
     village.save();
 
-    return res.status(StatusCodes.OK).json({msg: "Job canceled successfully!"});
+    return res
+      .status(StatusCodes.OK)
+      .json({ msg: "Job canceled successfully!" });
   } else {
     if (!villageId || !buildingName || !fieldId) {
       throw new BadRequestError("Parameters are missing!");
@@ -37,22 +39,29 @@ const postBuilding = async (req, res, next) => {
       throw new NotFoundError("Building not found!");
     }
 
-    if (villageObject[0].currentlyBuilding.length) {
+    console.log(
+      "villageObject.currentlyBuilding",
+      villageObject.currentlyBuilding
+    );
+
+    if (villageObject.currentlyBuilding.length) {
       throw new BadRequestError("Builders are currently unavailable!");
     }
 
     const getBuildingCurrentLevel = (
       isBuilding === true
-        ? villageObject[0].villageBuildings
-        : villageObject[0].resourceFields
+        ? villageObject.villageBuildings
+        : villageObject.resourceFields
     ).find((building) => building.id === fieldId);
+
+    console.log("getBuildingCurrentLevel", getBuildingCurrentLevel);
 
     if (getBuildingCurrentLevel === undefined) {
       throw new NotFoundError("Building not found!");
     }
 
     const getBuildingNextLevel =
-      buildingObject[0].levels[0][`${getBuildingCurrentLevel.level + 1}`];
+      buildingObject.levels[0][`${getBuildingCurrentLevel.level + 1}`];
 
     if (!getBuildingNextLevel) {
       throw new BadRequestError("Building is max level!");
@@ -66,8 +75,8 @@ const postBuilding = async (req, res, next) => {
     }
 
     const villageCurrentResources = await updateResourcesToDate(
-      villageObject[0],
-      villageId
+      villageObject,
+      village._id
     );
 
     const buildingBuildTime = getBuildingNextLevel.timeToBuild;
@@ -92,22 +101,25 @@ const postBuilding = async (req, res, next) => {
 
     const iteration =
       isBuilding === true
-        ? villageObject[0].villageBuildings
-        : villageObject[0].resourceFields;
+        ? villageObject.villageBuildings
+        : villageObject.resourceFields;
 
     updatedObject = iteration.map((item) => {
       if (item.id === fieldId) {
         return {
-          ...item,
+          gridPosition: item.gridPosition,
+          description: item.description,
+          id: item.id,
+          type: item.type,
           level: getBuildingCurrentLevel.level + 1,
           imageGrid: getBuildingNextLevel.image
             ? getBuildingNextLevel.image
-            : buildingObject[0].image,
+            : buildingObject.image,
           ...(isBuilding === true && {
             type: buildingName,
           }),
-          ...(buildingObject[0].description && {
-            description: buildingObject[0].description,
+          ...(buildingObject.description && {
+            description: buildingObject.description,
           }),
         };
       } else {
@@ -136,7 +148,9 @@ const postBuilding = async (req, res, next) => {
         endBuildTime: endBuildTime,
       },
     ];
-    (village.resourcesStorage = resourcesStorageMinus), await village.save();
+
+    village.resourcesStorage = resourcesStorageMinus;
+    await village.save();
 
     console.log("Added currently building and reduced resources!");
 
@@ -147,26 +161,33 @@ const postBuilding = async (req, res, next) => {
         console.log("Execute update!", dayjs().toDate());
 
         village.currentlyBuilding = [];
-        village.population =
-          villageObject[0].population + getBuildingNextLevel.populationAdd;
 
-        isBuilding === true
-          ? village.villageBuildings.updatedObject
-          : {
-              resourceFields: updatedObject,
-              [`${buildingNamePrefix[0]}ProductionPerH`]:
-                getBuildingNextLevel.productionAdd +
-                villageObject[0][`${buildingNamePrefix[0]}ProductionPerH`],
-            };
+        village.population =
+          villageObject.population + getBuildingNextLevel.populationAdd;
+
+        if (isBuilding === true) {
+          village.villageBuildings = updatedObject;
+        } else {
+          village.resourceFields = updatedObject;
+          village[`${buildingNamePrefix[0]}ProductionPerH`] =
+            getBuildingNextLevel.productionAdd +
+            villageObject[`${buildingNamePrefix[0]}ProductionPerH`];
+        }
 
         await village.save();
       }
     );
 
-    return res
-      .status(StatusCodes.OK)
-      .json({msg: "Request for upgrade in progress!"});
+    return res.status(StatusCodes.OK).json({
+      resourcesStorageMinus: resourcesStorageMinus,
+      currentlyBuilding: {
+        buildingId: buildingName,
+        currentlyBuildingLevel: getBuildingCurrentLevel.level + 1,
+        fieldId: fieldId,
+        endBuildTime: endBuildTime,
+      },
+    });
   }
 };
 
-export {postBuilding};
+export { postBuilding };

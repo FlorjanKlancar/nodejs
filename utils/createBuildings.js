@@ -1,6 +1,7 @@
 export const createBuildings = [
   {
     type: "barracks",
+    name: "Barracks",
     description:
       "On the halls of this building, normal citizens become warriors, ready to serve their lords and lands.",
     image:
@@ -45,6 +46,7 @@ export const createBuildings = [
 
   {
     type: "warehouse",
+    name: "Warehouse",
     description:
       "In this building, the spoils of war, the harvest of the season, the riches mined from the earth and the hand made craft are safely stored",
     image:
@@ -93,6 +95,7 @@ export const createBuildings = [
 
   {
     type: "granary",
+    name: "Granary",
     description:
       "The granary is where the seeds for the new season of growth are safely stored",
     image:
@@ -141,6 +144,7 @@ export const createBuildings = [
 
   {
     type: "wood_field",
+    name: "Wood field",
     description:
       "The granary is where the seeds for the new season of growth are safely stored",
     image:
@@ -200,6 +204,7 @@ export const createBuildings = [
 
   {
     type: "clay_field",
+    name: "Clay field",
     description:
       "It processes clay from nearby mud to later be used for construction.",
     image:
@@ -259,6 +264,7 @@ export const createBuildings = [
 
   {
     type: "iron_field",
+    name: "Iron field",
     description:
       "From the depths of the earth, different metals are extracted to make armors, weapons and tools.",
     image:
@@ -318,6 +324,7 @@ export const createBuildings = [
 
   {
     type: "wheat_field",
+    name: "Wheat field",
     description:
       "All armies move at the speed of their stomachs, and all powerful nations require high amounts of food, this farm ensures that.",
     image:
@@ -377,6 +384,7 @@ export const createBuildings = [
 
   {
     type: "stables",
+    name: "Stables",
     description: "Konjušnca",
     image: "konj.png",
     levels: [
