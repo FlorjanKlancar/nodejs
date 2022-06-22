@@ -71,7 +71,6 @@ const newVillage = {
     {
       gridPosition: 6,
       id: 7,
-      level: 1,
       type: "village_center",
       imageGrid:
         "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/2.png?alt=media&token=da17d6ad-82a8-49ca-bd38-39d10ad5de66",
@@ -106,7 +105,6 @@ const newVillage = {
     {
       gridPosition: 10,
       id: 11,
-      level: 1,
       type: "village_center",
       imageGrid:
         "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/4.png?alt=media&token=d20a6b45-cb9f-4d43-a077-5c4e0da42a9a",
