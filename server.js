@@ -10,6 +10,7 @@ import gsUnitsRouter from "./routes/gsUnitsRoutes.js";
 import villageRouter from "./routes/villageRoutes.js";
 import buildRouter from "./routes/buildRoutes.js";
 import connectDb from "./db/connect.js";
+import statisticRouter from "./routes/statisticsRoutes.js";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use("/api/gsUnits", gsUnitsRouter);
 app.use("/api/village", villageRouter);
 app.use("/api/build", buildRouter);
 app.use("/api/init", initRouter);
+app.use("/api/statistics", statisticRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
