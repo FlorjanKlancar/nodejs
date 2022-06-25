@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { StatusCodes } from "http-status-codes";
 import schedule from "node-schedule";
 import BadRequestError from "../errors/bad-request.js";
+import NotFoundError from "../errors/not-found.js";
 import Village from "../models/Village.js";
 import { updateResourcesToDate } from "./gameController.js";
 import { getBuildingById } from "./gsBuildingsController.js";
@@ -35,14 +36,9 @@ const postBuilding = async (req, res, next) => {
     const buildingObject = await getBuildingById(buildingName);
     const villageObject = await getVillageById(villageId);
 
-    if (buildingObject.status === 404) {
+    if (!buildingObject) {
       throw new NotFoundError("Building not found!");
     }
-
-    console.log(
-      "villageObject.currentlyBuilding",
-      villageObject.currentlyBuilding
-    );
 
     if (villageObject.currentlyBuilding.length) {
       throw new BadRequestError("Builders are currently unavailable!");
@@ -54,14 +50,16 @@ const postBuilding = async (req, res, next) => {
         : villageObject.resourceFields
     ).find((building) => building.id === fieldId);
 
-    console.log("getBuildingCurrentLevel", getBuildingCurrentLevel);
-
     if (getBuildingCurrentLevel === undefined) {
       throw new NotFoundError("Building not found!");
     }
 
     const getBuildingNextLevel =
-      buildingObject.levels[0][`${getBuildingCurrentLevel.level + 1}`];
+      buildingObject.levels[0][
+        `${!getBuildingCurrentLevel ? 1 : getBuildingCurrentLevel.level + 1}`
+      ];
+
+    console.log("getBuildingNextLevel", getBuildingNextLevel);
 
     if (!getBuildingNextLevel) {
       throw new BadRequestError("Building is max level!");
@@ -111,7 +109,9 @@ const postBuilding = async (req, res, next) => {
           description: item.description,
           id: item.id,
           type: item.type,
-          level: getBuildingCurrentLevel.level + 1,
+          level: getBuildingCurrentLevel
+            ? getBuildingCurrentLevel.level + 1
+            : 1,
           imageGrid: getBuildingNextLevel.image
             ? getBuildingNextLevel.image
             : buildingObject.image,
@@ -143,7 +143,9 @@ const postBuilding = async (req, res, next) => {
     village.currentlyBuilding = [
       {
         buildingId: buildingName,
-        currentlyBuildingLevel: getBuildingCurrentLevel.level + 1,
+        currentlyBuildingLevel: getBuildingCurrentLevel
+          ? getBuildingCurrentLevel.level + 1
+          : 1,
         fieldId: fieldId,
         endBuildTime: endBuildTime,
       },
@@ -182,7 +184,9 @@ const postBuilding = async (req, res, next) => {
       resourcesStorageMinus: resourcesStorageMinus,
       currentlyBuilding: {
         buildingId: buildingName,
-        currentlyBuildingLevel: getBuildingCurrentLevel.level + 1,
+        currentlyBuildingLevel: getBuildingCurrentLevel
+          ? getBuildingCurrentLevel.level + 1
+          : 1,
         fieldId: fieldId,
         endBuildTime: endBuildTime,
       },

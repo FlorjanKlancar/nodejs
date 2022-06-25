@@ -7,6 +7,7 @@ const BuildingSchema = new mongoose.Schema(
     name: { type: String },
     description: { type: String },
     image: { type: String },
+    group: { type: String },
     levels: [],
   },
   { timestamps: true }

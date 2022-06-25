@@ -2,10 +2,11 @@ export const createBuildings = [
   {
     type: "barracks",
     name: "Barracks",
+    group: "Offense",
     description:
       "On the halls of this building, normal citizens become warriors, ready to serve their lords and lands.",
     image:
-      "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/vojasnica.png?alt=media&token=4aa41cf7-ac2e-45de-ae03-6e34704882c7",
+      "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/barracks.png?alt=media&token=fd3b5b3f-b899-495f-a25b-efaf622b8c11",
     levels: [
       {
         1: {
@@ -47,10 +48,11 @@ export const createBuildings = [
   {
     type: "warehouse",
     name: "Warehouse",
+    group: "Infrastructure",
     description:
       "In this building, the spoils of war, the harvest of the season, the riches mined from the earth and the hand made craft are safely stored",
     image:
-      "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/skladisce.png?alt=media&token=23b1c22a-c5fc-4324-8e05-7e556e13d254",
+      "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/warehouse.png?alt=media&token=770ea3b4-d6c4-493d-9431-44acea237829",
     levels: [
       {
         1: {
@@ -96,10 +98,11 @@ export const createBuildings = [
   {
     type: "granary",
     name: "Granary",
+    group: "Infrastructure",
     description:
       "The granary is where the seeds for the new season of growth are safely stored",
     image:
-      "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/zitnica.png?alt=media&token=42bcf843-1fcd-491b-b999-47470a112aac",
+      "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/granary.png?alt=media&token=b298ae5e-75fa-4968-a5e0-9304a82731c0",
     levels: [
       {
         1: {
@@ -145,6 +148,7 @@ export const createBuildings = [
   {
     type: "wood_field",
     name: "Wood field",
+    group: "Resources",
     description:
       "The granary is where the seeds for the new season of growth are safely stored",
     image:
@@ -205,6 +209,7 @@ export const createBuildings = [
   {
     type: "clay_field",
     name: "Clay field",
+    group: "Resources",
     description:
       "It processes clay from nearby mud to later be used for construction.",
     image:
@@ -265,6 +270,7 @@ export const createBuildings = [
   {
     type: "iron_field",
     name: "Iron field",
+    group: "Resources",
     description:
       "From the depths of the earth, different metals are extracted to make armors, weapons and tools.",
     image:
@@ -325,6 +331,7 @@ export const createBuildings = [
   {
     type: "wheat_field",
     name: "Wheat field",
+    group: "Resources",
     description:
       "All armies move at the speed of their stomachs, and all powerful nations require high amounts of food, this farm ensures that.",
     image:
@@ -386,7 +393,9 @@ export const createBuildings = [
     type: "stables",
     name: "Stables",
     description: "Konjušnca",
-    image: "konj.png",
+    image:
+      "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/stables.png?alt=media&token=fa149129-73fb-47e2-b7e9-46a65835039b",
+    group: "Offense",
     levels: [
       {
         1: {
@@ -429,7 +438,7 @@ export const createBuildings = [
           timeToBuild: 7,
           populationAdd: 3,
           image:
-            "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/wheat_level_5.png?alt=media&token=8abe4390-cff5-4366-8ddf-c33bddb927d2",
+            "https://firebasestorage.googleapis.com/v0/b/app-deus-ex-machina.appspot.com/o/stables.png?alt=media&token=fa149129-73fb-47e2-b7e9-46a65835039b",
         },
       },
     ],

@@ -8,18 +8,20 @@ import { createUnits } from "../utils/createUnits.js";
 
 const initController = async (req, res) => {
   createBuildings.forEach(async (item) => {
+    console.log("item", item);
     const building = new Building({
       type: item.type,
       name: item.name,
       description: item.description,
       image: item.image,
       levels: item.levels,
+      group: item.group,
     });
 
     building.save();
   });
 
-  createUnits.forEach(async (item) => {
+  /*   createUnits.forEach(async (item) => {
     const unit = new Unit({
       unitName: item.unitName,
       costWood: item.costWood,
@@ -47,7 +49,7 @@ const initController = async (req, res) => {
     });
 
     rank.save();
-  });
+  }); */
 
   res.status(StatusCodes.OK).json("response");
 };
