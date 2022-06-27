@@ -8,17 +8,114 @@ import { updateResourcesToDate } from "./gameController.js";
 import { getBuildingById } from "./gsBuildingsController.js";
 import { getVillageById } from "./villageController.js";
 
+const createUpdatedObject = (
+  isBuilding,
+  buildingName,
+  fieldId,
+  villageObject,
+  getBuildingCurrentLevel,
+  getBuildingNextLevel,
+  buildingObject
+) => {
+  let updatedObjectTemp = {};
+
+  const iteration =
+    isBuilding === true
+      ? villageObject.villageBuildings
+      : villageObject.resourceFields;
+
+  updatedObjectTemp = iteration.map((item) => {
+    if (item.id === fieldId) {
+      return {
+        gridPosition: item.gridPosition,
+        description: item.description,
+        id: item.id,
+        type: item.type,
+        level: getBuildingCurrentLevel ? getBuildingCurrentLevel.level + 1 : 1,
+        imageGrid: getBuildingNextLevel.image
+          ? getBuildingNextLevel.image
+          : buildingObject.image,
+        ...(isBuilding === true && {
+          type: buildingName,
+        }),
+        ...(buildingObject.description && {
+          description: buildingObject.description,
+        }),
+      };
+    } else {
+      return item;
+    }
+  });
+
+  return updatedObjectTemp;
+};
+
 const postBuilding = async (req, res, next) => {
   const villageId = req.body.villageId;
   const buildingName = req.body.buildingName;
   const fieldId = req.body.fieldId;
   const isBuilding = req.body.isBuilding;
   const cancleJob = req.body.cancleJob;
+  const forceFinishJob = req.body.forceFinishJob;
+
+  console.log("req.body", req.body);
 
   const village = await Village.findOne({ userId: villageId });
+  const buildingNamePrefix = buildingName.split("_");
+
+  if (forceFinishJob && Object.keys(schedule.scheduledJobs).length !== 0) {
+    var my_job = schedule.scheduledJobs[buildingName];
+
+    my_job.cancel();
+
+    const villageObject = await getVillageById(villageId);
+    const buildingObject = await getBuildingById(buildingName);
+
+    const getBuildingCurrentLevel = (
+      isBuilding === true
+        ? villageObject.villageBuildings
+        : villageObject.resourceFields
+    ).find((building) => building.id === fieldId);
+    const getBuildingNextLevel =
+      buildingObject.levels[0][
+        `${!getBuildingCurrentLevel ? 1 : getBuildingCurrentLevel.level + 1}`
+      ];
+
+    const updatedObject = createUpdatedObject(
+      isBuilding,
+      buildingName,
+      fieldId,
+      villageObject,
+      getBuildingCurrentLevel,
+      getBuildingNextLevel,
+      buildingObject
+    );
+
+    console.log("Execute update!", dayjs().toDate());
+
+    village.currentlyBuilding = [];
+
+    village.population =
+      villageObject.population + getBuildingNextLevel.populationAdd;
+
+    if (isBuilding === true) {
+      village.villageBuildings = updatedObject;
+    } else {
+      village.resourceFields = updatedObject;
+      village[`${buildingNamePrefix[0]}ProductionPerH`] =
+        getBuildingNextLevel.productionAdd +
+        villageObject[`${buildingNamePrefix[0]}ProductionPerH`];
+    }
+
+    await village.save();
+
+    return res.status(StatusCodes.OK).send("Force update finished");
+  }
 
   if (cancleJob && Object.keys(schedule.scheduledJobs).length !== 0) {
     var my_job = schedule.scheduledJobs[buildingName];
+
+    console.log("my_job", my_job);
     my_job.cancel();
 
     console.log("cancled job!");
@@ -95,37 +192,15 @@ const postBuilding = async (req, res, next) => {
 
     const endBuildTime = dayjs().add(buildingBuildTime, "s").toDate();
 
-    let updatedObject = {};
-
-    const iteration =
-      isBuilding === true
-        ? villageObject.villageBuildings
-        : villageObject.resourceFields;
-
-    updatedObject = iteration.map((item) => {
-      if (item.id === fieldId) {
-        return {
-          gridPosition: item.gridPosition,
-          description: item.description,
-          id: item.id,
-          type: item.type,
-          level: getBuildingCurrentLevel
-            ? getBuildingCurrentLevel.level + 1
-            : 1,
-          imageGrid: getBuildingNextLevel.image
-            ? getBuildingNextLevel.image
-            : buildingObject.image,
-          ...(isBuilding === true && {
-            type: buildingName,
-          }),
-          ...(buildingObject.description && {
-            description: buildingObject.description,
-          }),
-        };
-      } else {
-        return item;
-      }
-    });
+    const updatedObject = createUpdatedObject(
+      isBuilding,
+      buildingName,
+      fieldId,
+      villageObject,
+      getBuildingCurrentLevel,
+      getBuildingNextLevel,
+      buildingObject
+    );
 
     const resourcesStorageMinus = {
       woodAmount:
@@ -138,8 +213,6 @@ const postBuilding = async (req, res, next) => {
         villageCurrentResources.wheatAmount - buildingResourcesNeeded.wheat,
     };
 
-    const buildingNamePrefix = buildingName.split("_");
-
     village.currentlyBuilding = [
       {
         buildingId: buildingName,
@@ -148,6 +221,7 @@ const postBuilding = async (req, res, next) => {
           : 1,
         fieldId: fieldId,
         endBuildTime: endBuildTime,
+        isBuilding: isBuilding,
       },
     ];
 
