@@ -7,7 +7,7 @@ import { createRankings } from "../utils/createRankings.js";
 import { createUnits } from "../utils/createUnits.js";
 
 const initController = async (req, res) => {
-  createBuildings.forEach(async (item) => {
+  /*   createBuildings.forEach(async (item) => {
     console.log("item", item);
     const building = new Building({
       type: item.type,
@@ -19,9 +19,9 @@ const initController = async (req, res) => {
     });
 
     building.save();
-  });
+  }); */
 
-  /*   createUnits.forEach(async (item) => {
+  createUnits.forEach(async (item) => {
     const unit = new Unit({
       unitName: item.unitName,
       costWood: item.costWood,
@@ -39,7 +39,7 @@ const initController = async (req, res) => {
 
     unit.save();
   });
-
+  /*
   createRankings.forEach(async (item) => {
     const rank = new Rank({
       rank: item.rank,

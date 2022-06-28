@@ -1,6 +1,6 @@
 const createUnits = [
   {
-    unitName: "Gorjačar",
+    unitName: "Clubswinger",
     costWood: 100,
     costClay: 100,
     costIron: 100,
@@ -14,7 +14,7 @@ const createUnits = [
     unitBuilding: "barracks",
   },
   {
-    unitName: "Suličar",
+    unitName: "Spearman",
     costWood: 200,
     costClay: 200,
     costIron: 200,
@@ -58,7 +58,7 @@ const createUnits = [
   },
 
   {
-    unitName: "Jadn konj",
+    unitName: "Basic Horseman",
     costWood: 50,
     costClay: 50,
     costIron: 50,
@@ -73,7 +73,7 @@ const createUnits = [
   },
 
   {
-    unitName: "Tevtonski vitez",
+    unitName: "Heavy Knight",
     costWood: 100,
     costClay: 100,
     costIron: 100,
@@ -104,4 +104,4 @@ const createUnits = [
   },
 ]; //END ARRAY
 
-export {createUnits};
+export { createUnits };
