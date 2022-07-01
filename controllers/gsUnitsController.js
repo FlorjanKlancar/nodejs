@@ -6,5 +6,10 @@ const getUnitsEndpoint = async (req, res, next) => {
 
   return res.status(StatusCodes.OK).json(response);
 };
+const getUnits = async () => {
+  const response = await Unit.find({});
 
-export {getUnitsEndpoint};
+  return response;
+};
+
+export {getUnitsEndpoint, getUnits};

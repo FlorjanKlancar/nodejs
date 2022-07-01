@@ -1,12 +1,13 @@
 import dayjs from "dayjs";
-import { StatusCodes } from "http-status-codes";
+import {StatusCodes} from "http-status-codes";
 import schedule from "node-schedule";
 import BadRequestError from "../errors/bad-request.js";
 import NotFoundError from "../errors/not-found.js";
 import Village from "../models/Village.js";
-import { updateResourcesToDate } from "./gameController.js";
-import { getBuildingById } from "./gsBuildingsController.js";
-import { getVillageById } from "./villageController.js";
+import {updateResourcesToDate} from "./gameController.js";
+import {getBuildingById} from "./gsBuildingsController.js";
+import {getUnits} from "./gsUnitsController.js";
+import {getVillageById} from "./villageController.js";
 
 const createUpdatedObject = (
   isBuilding,
@@ -58,9 +59,7 @@ const postBuilding = async (req, res, next) => {
   const cancleJob = req.body.cancleJob;
   const forceFinishJob = req.body.forceFinishJob;
 
-  console.log("req.body", req.body);
-
-  const village = await Village.findOne({ userId: villageId });
+  const village = await Village.findOne({userId: villageId});
   const buildingNamePrefix = buildingName.split("_");
 
   if (forceFinishJob && Object.keys(schedule.scheduledJobs).length !== 0) {
@@ -122,9 +121,7 @@ const postBuilding = async (req, res, next) => {
     village.currentlyBuilding = [];
     village.save();
 
-    return res
-      .status(StatusCodes.OK)
-      .json({ msg: "Job canceled successfully!" });
+    return res.status(StatusCodes.OK).json({msg: "Job canceled successfully!"});
   } else {
     if (!villageId || !buildingName || !fieldId) {
       throw new BadRequestError("Parameters are missing!");
@@ -268,4 +265,160 @@ const postBuilding = async (req, res, next) => {
   }
 };
 
-export { postBuilding };
+const postUnitsBuild = async (req, res, next) => {
+  const villageId = req.body.villageId;
+  const buildingName = req.body.buildingName;
+  const unitName = req.body.unitName;
+  const unitAmount = req.body.unitAmount;
+
+  const village = await Village.findOne({userId: villageId});
+
+  const allUnits = await getUnits();
+  const villageObject = await getVillageById(villageId);
+
+  const currentlyBuildingUnits = villageObject.unitTrainQueue;
+  const lastUnitBuilding = currentlyBuildingUnits.slice(-1)[0] || null;
+
+  const unitObject = allUnits.find((unit) => unit.unitName === buildingName);
+  console.log("unitObject", unitObject);
+  const specifiedUnit = unitObject.units[unitName];
+
+  const villageCurrentResources = await updateResourcesToDate(
+    villageObject,
+    village._id
+  );
+
+  async function getLatestVillageInfo(villageId) {
+    const latestVillageObject = await getVillageById(villageId);
+
+    console.log("latestVillageObject", latestVillageObject);
+    let latestVillageInfo = {
+      allUnitsInVillage: latestVillageObject.units,
+      unitTrainQueue: latestVillageObject.unitTrainQueue,
+    };
+
+    return latestVillageInfo;
+  }
+
+  const unitResourcesNeeded = {
+    wood: specifiedUnit.costWood * unitAmount,
+    clay: specifiedUnit.costClay * unitAmount,
+    iron: specifiedUnit.costIron * unitAmount,
+    wheat: specifiedUnit.costWheat * unitAmount,
+  };
+
+  if (
+    villageCurrentResources.resourcesStorage.woodAmount <
+      unitResourcesNeeded.wood ||
+    villageCurrentResources.resourcesStorage.clayAmount <
+      unitResourcesNeeded.clay ||
+    villageCurrentResources.resourcesStorage.ironAmount <
+      unitResourcesNeeded.iron ||
+    villageCurrentResources.resourcesStorage.wheatAmount <
+      unitResourcesNeeded.wheat
+  )
+    throw new BadRequestError("Insufficient resources!");
+
+  const resourcesStorageMinus = {
+    woodAmount:
+      villageCurrentResources.resourcesStorage.woodAmount -
+      unitResourcesNeeded.wood,
+    clayAmount:
+      villageCurrentResources.resourcesStorage.clayAmount -
+      unitResourcesNeeded.clay,
+    ironAmount:
+      villageCurrentResources.resourcesStorage.ironAmount -
+      unitResourcesNeeded.iron,
+    wheatAmount:
+      villageCurrentResources.resourcesStorage.wheatAmount -
+      unitResourcesNeeded.wheat,
+  };
+
+  let currentTime = dayjs().toDate();
+  let unitsBuildTime = unitObject.units[unitName].timeToBuild;
+  let endBuildTime = dayjs(currentTime).add(unitsBuildTime, "s").toDate();
+  let queueEndTime = dayjs(
+    !lastUnitBuilding ? currentTime : lastUnitBuilding.endThisBuild.toDate()
+  )
+    .add(unitsBuildTime * unitAmount, "s")
+    .toDate();
+
+  village.update({
+    resourcesStorage: resourcesStorageMinus,
+    unitTrainQueue: [
+      ...currentlyBuildingUnits,
+      {unit: unitName, amount: unitAmount, endThisBuild: queueEndTime},
+    ],
+  });
+
+  village.save();
+  console.log("Reduced resources!");
+  let i = 0;
+
+  if (lastUnitBuilding) {
+    const job = schedule.scheduleJob(
+      lastUnitBuilding.endThisBuild.toDate(),
+      async function () {
+        scheduleJobFunc(
+          currentTime,
+          dayjs(lastUnitBuilding.endThisBuild.toDate())
+            .add(unitsBuildTime, "s")
+            .toDate(),
+          (i = 0)
+        );
+      }
+    );
+  } else {
+    scheduleJobFunc(currentTime, endBuildTime, i);
+  }
+
+  async function scheduleJobFunc(currentTime, endBuildTime, i) {
+    console.log("start scheduleJobFunc");
+
+    console.log("i = ", i, "Unit am: ", unitAmount);
+    i = i + 1;
+    if (i <= unitAmount) {
+      const job = schedule.scheduleJob(endBuildTime, async function () {
+        console.log("Unit built!, NEXT!");
+
+        let {allUnitsInVillage} = await getLatestVillageInfo(villageId);
+
+        allUnitsInVillage = allUnitsInVillage.map((unit) => {
+          if (unit.name === unitName) {
+            return {
+              ...unit,
+              amount: unit.amount + 1,
+            };
+          } else return unit;
+        });
+
+        console.log("updatedArray", allUnitsInVillage);
+
+        village.update({
+          units: allUnitsInVillage,
+        });
+        village.save();
+
+        currentTime = await getServerTime();
+
+        endBuildTime = dayjs(currentTime).add(unitsBuildTime, "s").toDate();
+        scheduleJobFunc(currentTime, endBuildTime, i);
+      });
+    } else {
+      let {unitTrainQueue} = await getLatestVillageInfo(villageId);
+
+      const [, ...rest] = unitTrainQueue;
+
+      village.update({
+        unitTrainQueue: rest,
+      });
+      village.save();
+    }
+  }
+
+  return res
+    .status(StatusCodes.OK)
+    .json({msg: "Unit build request sent successfully!"});
+};
+
+export {postBuilding, postUnitsBuild};
