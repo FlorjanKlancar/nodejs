@@ -1,13 +1,13 @@
 import dayjs from "dayjs";
-import { StatusCodes } from "http-status-codes";
+import {StatusCodes} from "http-status-codes";
 import schedule from "node-schedule";
 import BadRequestError from "../errors/bad-request.js";
 import NotFoundError from "../errors/not-found.js";
 import Village from "../models/Village.js";
-import { updateResourcesToDate } from "./gameController.js";
-import { getBuildingById } from "./gsBuildingsController.js";
-import { getUnits } from "./gsUnitsController.js";
-import { getVillageById } from "./villageController.js";
+import {updateResourcesToDate} from "./gameController.js";
+import {getBuildingById} from "./gsBuildingsController.js";
+import {getUnits} from "./gsUnitsController.js";
+import {getVillageById} from "./villageController.js";
 
 const createUpdatedObject = (
   isBuilding,
@@ -59,7 +59,7 @@ const postBuilding = async (req, res, next) => {
   const cancleJob = req.body.cancleJob;
   const forceFinishJob = req.body.forceFinishJob;
 
-  const village = await Village.findOne({ userId: villageId });
+  const village = await Village.findOne({userId: villageId});
   const buildingNamePrefix = buildingName.split("_");
 
   if (forceFinishJob && Object.keys(schedule.scheduledJobs).length !== 0) {
@@ -121,9 +121,7 @@ const postBuilding = async (req, res, next) => {
     village.currentlyBuilding = [];
     village.save();
 
-    return res
-      .status(StatusCodes.OK)
-      .json({ msg: "Job canceled successfully!" });
+    return res.status(StatusCodes.OK).json({msg: "Job canceled successfully!"});
   } else {
     if (!villageId || !buildingName || !fieldId) {
       throw new BadRequestError("Parameters are missing!");
@@ -234,6 +232,7 @@ const postBuilding = async (req, res, next) => {
       endBuildTime,
       async function () {
         console.log("Execute update!", dayjs().toDate());
+        const village = await Village.findOne({userId: villageId});
 
         village.currentlyBuilding = [];
 
@@ -277,7 +276,7 @@ const postUnitsBuild = async (req, res, next) => {
     throw new BadRequestError("Parameters are missing!");
   }
 
-  const village = await Village.findOne({ userId: villageId });
+  const village = await Village.findOne({userId: villageId});
 
   const allUnits = await getUnits();
   const villageObject = await getVillageById(villageId);
@@ -332,7 +331,7 @@ const postUnitsBuild = async (req, res, next) => {
   let unitsBuildTime = specifiedUnit.timeToBuild;
   let endBuildTime = dayjs(currentTime).add(unitsBuildTime, "s").toDate();
   let queueEndTime = dayjs(
-    !lastUnitBuilding ? currentTime : lastUnitBuilding.endThisBuild.toDate()
+    !lastUnitBuilding ? currentTime : lastUnitBuilding.endThisBuild
   )
     .add(unitsBuildTime * unitAmount, "s")
     .toDate();
@@ -340,20 +339,20 @@ const postUnitsBuild = async (req, res, next) => {
   village.resourcesStorage = resourcesStorageMinus;
   village.unitTrainQueue = [
     ...currentlyBuildingUnits,
-    { unit: unitName, amount: unitAmount, endThisBuild: queueEndTime },
+    {unit: unitName, amount: unitAmount, endThisBuild: queueEndTime},
   ];
 
   await village.save();
-  console.log("Reduced resources!");
+  console.log("Reduced resources!", resourcesStorageMinus);
   let i = 0;
 
   if (lastUnitBuilding) {
     const job = schedule.scheduleJob(
-      lastUnitBuilding.endThisBuild.toDate(),
+      lastUnitBuilding.endThisBuild,
       async function () {
         scheduleJobFunc(
           currentTime,
-          dayjs(lastUnitBuilding.endThisBuild.toDate())
+          dayjs(lastUnitBuilding.endThisBuild)
             .add(unitsBuildTime, "s")
             .toDate(),
           (i = 0)
@@ -373,7 +372,7 @@ const postUnitsBuild = async (req, res, next) => {
       const job = schedule.scheduleJob(endBuildTime, async function () {
         console.log("Unit built!, NEXT!");
 
-        let { allUnitsInVillage } = await getLatestVillageInfo(villageId);
+        let {allUnitsInVillage} = await getLatestVillageInfo(villageId);
 
         allUnitsInVillage = allUnitsInVillage.map((unit) => {
           if (unit.name === specifiedUnit.unitName) {
@@ -386,7 +385,7 @@ const postUnitsBuild = async (req, res, next) => {
           } else return unit;
         });
 
-        const village = await Village.findOne({ userId: villageId });
+        const village = await Village.findOne({userId: villageId});
         village.units = allUnitsInVillage;
         await village.save();
 
@@ -396,11 +395,11 @@ const postUnitsBuild = async (req, res, next) => {
         scheduleJobFunc(currentTime, endBuildTime, i);
       });
     } else {
-      let { unitTrainQueue } = await getLatestVillageInfo(villageId);
+      let {unitTrainQueue} = await getLatestVillageInfo(villageId);
 
       const [, ...rest] = unitTrainQueue;
 
-      const village = await Village.findOne({ userId: villageId });
+      const village = await Village.findOne({userId: villageId});
       village.unitTrainQueue = rest;
       await village.save();
     }
@@ -410,9 +409,9 @@ const postUnitsBuild = async (req, res, next) => {
     resourcesStorageMinus: resourcesStorageMinus,
     currentlyBuildingUnits: [
       ...currentlyBuildingUnits,
-      { unit: unitName, amount: unitAmount, endThisBuild: queueEndTime },
+      {unit: unitName, amount: unitAmount, endThisBuild: queueEndTime},
     ],
   });
 };
 
-export { postBuilding, postUnitsBuild };
+export {postBuilding, postUnitsBuild};
