@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const UserSchema = new mongoose.Schema({
-  id: {type: Number},
+  id: { type: Number },
   displayName: {
     type: String,
     maxlength: 20,
