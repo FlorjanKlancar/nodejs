@@ -32,6 +32,7 @@ const createVillage = async (req, res) => {
   const village = new Village({
     ...newVillage,
     units: allUnits,
+    elo: 100,
     userId: req.body.userId,
   });
 

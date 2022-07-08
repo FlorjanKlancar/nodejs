@@ -14,6 +14,10 @@ import statisticRouter from "./routes/statisticsRoutes.js";
 import userInfoRouter from "./routes/userInfoRoutes.js";
 import { Server } from "socket.io";
 import { createServer } from "http";
+import {
+  addUserToQueue,
+  matchUsersInQueue,
+} from "./controllers/queueController.js";
 
 dotenv.config();
 
@@ -52,27 +56,34 @@ const start = async () => {
 
 start();
 
-// socket
-
-/* const io = new Server(httpServer, {
-  cors: {
-    origin: "*",
-  },
-});
-
-// socket connection
-io.on("connection", (socket) => {
-  console.log(socket.id);
-}); */
 const io = new Server(httpServer, {
   cors: {
     origin: "http://localhost:3000",
   },
-}); //in case server and client run on different urls
+});
 io.on("connection", (socket) => {
   console.log("client connected: ", socket.id);
 
   socket.on("disconnect", (reason) => {
     console.log(reason);
+  });
+
+  socket.on("addUserToQueue", async ({ userId, selectedSquad }) => {
+    console.log("socket", socket.id);
+    const response = await addUserToQueue(userId, selectedSquad, socket.id);
+
+    if (response.status === 200) {
+      socket.emit("queueResponse", { response });
+      const battleResponse = await matchUsersInQueue(response.userId);
+
+      if (battleResponse.status === 200) {
+        socket.emit("battleResponse", { response: battleResponse.battle });
+        socket
+          .to(battleResponse.battle.playerTwoSocketId)
+          .emit("battleResponse", { response: battleResponse.battle });
+      }
+    } else {
+      socket.emit("queueResponse", { response });
+    }
   });
 });

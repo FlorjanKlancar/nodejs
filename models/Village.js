@@ -47,6 +47,7 @@ const VillageSchema = new mongoose.Schema(
         name: { type: String },
       },
     ],
+    elo: { type: Number },
     userId: { type: mongoose.Schema.ObjectId, ref: "User" },
   },
   { timestamps: true }
