@@ -12,12 +12,14 @@ import buildRouter from "./routes/buildRoutes.js";
 import connectDb from "./db/connect.js";
 import statisticRouter from "./routes/statisticsRoutes.js";
 import userInfoRouter from "./routes/userInfoRoutes.js";
-import { Server } from "socket.io";
-import { createServer } from "http";
+import {Server} from "socket.io";
+import {createServer} from "http";
 import {
   addUserToQueue,
+  cancelQueue,
   matchUsersInQueue,
 } from "./controllers/queueController.js";
+import battleRouter from "./routes/battleRoutes.js";
 
 dotenv.config();
 
@@ -37,6 +39,7 @@ app.use("/api/build", buildRouter);
 app.use("/api/init", initRouter);
 app.use("/api/statistics", statisticRouter);
 app.use("/api/user", userInfoRouter);
+app.use("/api/battle", battleRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
@@ -68,22 +71,28 @@ io.on("connection", (socket) => {
     console.log(reason);
   });
 
-  socket.on("addUserToQueue", async ({ userId, selectedSquad }) => {
+  socket.on("addUserToQueue", async ({userId, selectedSquad}) => {
     console.log("socket", socket.id);
     const response = await addUserToQueue(userId, selectedSquad, socket.id);
 
     if (response.status === 200) {
-      socket.emit("queueResponse", { response });
+      socket.emit("queueResponse", {response});
       const battleResponse = await matchUsersInQueue(response.userId);
 
       if (battleResponse.status === 200) {
-        socket.emit("battleResponse", { response: battleResponse.battle });
+        socket.emit("battleResponse", {response: battleResponse.battle});
         socket
           .to(battleResponse.battle.playerTwoSocketId)
-          .emit("battleResponse", { response: battleResponse.battle });
+          .emit("battleResponse", {response: battleResponse.battle});
       }
     } else {
-      socket.emit("queueResponse", { response });
+      socket.emit("queueResponse", {response});
     }
+  });
+
+  socket.on("cancelUserFromQueue", async ({userId}) => {
+    const response = await cancelQueue(userId);
+
+    socket.emit("cancelResponse", {response});
   });
 });

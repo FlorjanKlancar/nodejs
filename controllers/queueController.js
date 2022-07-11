@@ -2,12 +2,12 @@ import Battle from "../models/Battle.js";
 import Queue from "../models/Queue.js";
 import User from "../models/User.js";
 import Village from "../models/Village.js";
-import { getVillageById } from "./villageController.js";
+import {getVillageById} from "./villageController.js";
 
 const ELO_DIFFERENCE = 300;
 
 const checkIfUserAlreadyInQ = async (userId) => {
-  const userInQ = await Queue.findOne({ userId: userId });
+  const userInQ = await Queue.findOne({userId: userId});
 
   if (userInQ) {
     return true;
@@ -17,12 +17,15 @@ const checkIfUserAlreadyInQ = async (userId) => {
 };
 
 const addUserToQueue = async (userId, selectedSquad, socketId) => {
-  const user = await User.findOne({ _id: userId });
+  const user = await User.findOne({_id: userId});
   if (!user) {
-    return res.status(StatusCodes.BAD_REQUEST).send("No user found");
+    return {
+      status: 400,
+      msg: `No user found`,
+    };
   }
 
-  const { units: currentVillageUnits, elo } = await getVillageById(userId);
+  const {units: currentVillageUnits, elo} = await getVillageById(userId);
 
   const updatedUnitsInVillage = currentVillageUnits.map((unitInVillage) => {
     const findUnit = selectedSquad.find(
@@ -53,9 +56,9 @@ const addUserToQueue = async (userId, selectedSquad, socketId) => {
 
   const isUserAlreadyInQueue = await checkIfUserAlreadyInQ(userId);
   if (isUserAlreadyInQueue) {
-    return { status: 400, msg: "User is already in queue" };
+    return {status: 400, msg: "User is already in queue"};
   } else {
-    const village = await Village.findOne({ userId: userId });
+    const village = await Village.findOne({userId: userId});
 
     village.units = updatedUnitsInVillage;
     await village.save();
@@ -68,12 +71,16 @@ const addUserToQueue = async (userId, selectedSquad, socketId) => {
     });
     await addUserToQ.save();
 
-    return { status: 200, msg: "User added to queue", userId };
+    return {status: 200, msg: "User added to queue", userId};
   }
 };
 
+const calculateWinner = (player1, player2) => {
+  return "You won";
+};
+
 const matchUsersInQueue = async (userId) => {
-  const queue = await Queue.find({}).sort({ createdAt: -1 });
+  const queue = await Queue.find({}).sort({createdAt: -1});
 
   const firstPlayer = queue.find(
     (player) => player.userId.toString() === userId
@@ -98,16 +105,111 @@ const matchUsersInQueue = async (userId) => {
 
       playerOneSocketId: firstPlayer.socketId,
       playerTwoSocketId: findOpponent.socketId,
-      winner: "Calculate",
+      winner: calculateWinner(firstPlayer, findOpponent),
+      newReport: true,
     });
 
     await battle.save();
 
-    await Queue.findOneAndRemove({ userId: firstPlayer.userId });
-    await Queue.findOneAndRemove({ userId: findOpponent.userId });
+    await Queue.findOneAndRemove({userId: firstPlayer.userId});
+    await Queue.findOneAndRemove({userId: findOpponent.userId});
 
-    return { status: 200, battle };
-  } else return { status: 400, msg: "No opponent found yet!" };
+    const firstPlayerVillage = await Village.findOne({
+      userId: firstPlayer.userId,
+    });
+    const findOpponentVillage = await Village.findOne({
+      userId: findOpponent.userId,
+    });
+
+    const updateUnitsFirstPlayer = firstPlayerVillage.units.map(
+      (villageUnit) => {
+        const foundUnit = firstPlayer.unitsInQueue.find((fightUnit) => {
+          if (villageUnit.name === fightUnit.name) {
+            return fightUnit;
+          }
+        });
+
+        return {
+          _id: villageUnit._id,
+          level: foundUnit ? foundUnit.level : villageUnit.level,
+          name: villageUnit.name,
+          amount: foundUnit
+            ? villageUnit.amount + foundUnit.amount
+            : villageUnit.amount,
+        };
+      }
+    );
+    const updateUnitsfindOpponent = findOpponentVillage.units.map(
+      (villageUnit) => {
+        const foundUnit = findOpponent.unitsInQueue.find((fightUnit) => {
+          if (villageUnit.name === fightUnit.name) {
+            return fightUnit;
+          }
+        });
+
+        return {
+          _id: villageUnit._id,
+          level: foundUnit ? foundUnit.level : villageUnit.level,
+          name: villageUnit.name,
+          amount: foundUnit
+            ? villageUnit.amount + foundUnit.amount
+            : villageUnit.amount,
+        };
+      }
+    );
+
+    firstPlayerVillage.units = updateUnitsFirstPlayer;
+    await firstPlayerVillage.save();
+    findOpponentVillage.units = updateUnitsfindOpponent;
+    await findOpponentVillage.save();
+
+    return {status: 200, battle};
+  } else return {status: 400, msg: "No opponent found yet!"};
 };
 
-export { addUserToQueue, matchUsersInQueue };
+const cancelQueue = async (userId) => {
+  const user = await User.findOne({_id: userId});
+  if (!user) {
+    return {
+      status: 400,
+      msg: `No user found`,
+    };
+  }
+
+  const findInQueue = await Queue.findOneAndRemove({userId: userId});
+  if (!findInQueue)
+    return {
+      status: 400,
+      msg: `This user is not in queue`,
+    };
+
+  const village = await Village.findOne({userId: userId});
+
+  const updateUnits = village.units.map((villageUnit) => {
+    const foundUnit = findInQueue.unitsInQueue.find((fightUnit) => {
+      if (villageUnit.name === fightUnit.name) {
+        return fightUnit;
+      }
+    });
+
+    return {
+      _id: villageUnit._id,
+      level: foundUnit ? foundUnit.level : villageUnit.level,
+      name: villageUnit.name,
+      amount: foundUnit
+        ? villageUnit.amount + foundUnit.amount
+        : villageUnit.amount,
+    };
+  });
+
+  village.units = updateUnits;
+  await village.save();
+
+  return {
+    status: 200,
+    msg: `Removed user from queue and returned units to village!`,
+    updateUnits,
+  };
+};
+
+export {addUserToQueue, matchUsersInQueue, cancelQueue};
