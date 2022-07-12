@@ -12,8 +12,8 @@ import buildRouter from "./routes/buildRoutes.js";
 import connectDb from "./db/connect.js";
 import statisticRouter from "./routes/statisticsRoutes.js";
 import userInfoRouter from "./routes/userInfoRoutes.js";
-import {Server} from "socket.io";
-import {createServer} from "http";
+import { Server } from "socket.io";
+import { createServer } from "http";
 import {
   addUserToQueue,
   cancelQueue,
@@ -61,7 +61,7 @@ start();
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://dem-mongo.vercel.app",
   },
 });
 io.on("connection", (socket) => {
@@ -71,28 +71,28 @@ io.on("connection", (socket) => {
     console.log(reason);
   });
 
-  socket.on("addUserToQueue", async ({userId, selectedSquad}) => {
+  socket.on("addUserToQueue", async ({ userId, selectedSquad }) => {
     console.log("socket", socket.id);
     const response = await addUserToQueue(userId, selectedSquad, socket.id);
 
     if (response.status === 200) {
-      socket.emit("queueResponse", {response});
+      socket.emit("queueResponse", { response });
       const battleResponse = await matchUsersInQueue(response.userId);
 
       if (battleResponse.status === 200) {
-        socket.emit("battleResponse", {response: battleResponse.battle});
+        socket.emit("battleResponse", { response: battleResponse.battle });
         socket
           .to(battleResponse.battle.playerTwoSocketId)
-          .emit("battleResponse", {response: battleResponse.battle});
+          .emit("battleResponse", { response: battleResponse.battle });
       }
     } else {
-      socket.emit("queueResponse", {response});
+      socket.emit("queueResponse", { response });
     }
   });
 
-  socket.on("cancelUserFromQueue", async ({userId}) => {
+  socket.on("cancelUserFromQueue", async ({ userId }) => {
     const response = await cancelQueue(userId);
 
-    socket.emit("cancelResponse", {response});
+    socket.emit("cancelResponse", { response });
   });
 });
