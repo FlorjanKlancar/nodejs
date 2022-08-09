@@ -2,12 +2,12 @@ import Battle from "../models/Battle.js";
 import Queue from "../models/Queue.js";
 import User from "../models/User.js";
 import Village from "../models/Village.js";
-import {getVillageById} from "./villageController.js";
+import { getVillageById } from "./villageController.js";
 
 const ELO_DIFFERENCE = 300;
 
 const checkIfUserAlreadyInQ = async (userId) => {
-  const userInQ = await Queue.findOne({userId: userId});
+  const userInQ = await Queue.findOne({ userId: userId });
 
   if (userInQ) {
     return true;
@@ -17,7 +17,7 @@ const checkIfUserAlreadyInQ = async (userId) => {
 };
 
 const addUserToQueue = async (userId, selectedSquad, socketId) => {
-  const user = await User.findOne({_id: userId});
+  const user = await User.findOne({ _id: userId });
   if (!user) {
     return {
       status: 400,
@@ -25,7 +25,7 @@ const addUserToQueue = async (userId, selectedSquad, socketId) => {
     };
   }
 
-  const {units: currentVillageUnits, elo} = await getVillageById(userId);
+  const { units: currentVillageUnits, elo } = await getVillageById(userId);
 
   const updatedUnitsInVillage = currentVillageUnits.map((unitInVillage) => {
     const findUnit = selectedSquad.find(
@@ -56,9 +56,9 @@ const addUserToQueue = async (userId, selectedSquad, socketId) => {
 
   const isUserAlreadyInQueue = await checkIfUserAlreadyInQ(userId);
   if (isUserAlreadyInQueue) {
-    return {status: 400, msg: "User is already in queue"};
+    return { status: 400, msg: "User is already in queue" };
   } else {
-    const village = await Village.findOne({userId: userId});
+    const village = await Village.findOne({ userId: userId });
 
     village.units = updatedUnitsInVillage;
     await village.save();
@@ -71,7 +71,7 @@ const addUserToQueue = async (userId, selectedSquad, socketId) => {
     });
     await addUserToQ.save();
 
-    return {status: 200, msg: "User added to queue", userId};
+    return { status: 200, msg: "User added to queue", userId };
   }
 };
 
@@ -80,7 +80,7 @@ const calculateWinner = (player1, player2) => {
 };
 
 const matchUsersInQueue = async (userId) => {
-  const queue = await Queue.find({}).sort({createdAt: -1});
+  const queue = await Queue.find({}).sort({ createdAt: -1 });
 
   const firstPlayer = queue.find(
     (player) => player.userId.toString() === userId
@@ -111,8 +111,8 @@ const matchUsersInQueue = async (userId) => {
 
     await battle.save();
 
-    await Queue.findOneAndRemove({userId: firstPlayer.userId});
-    await Queue.findOneAndRemove({userId: findOpponent.userId});
+    await Queue.findOneAndRemove({ userId: firstPlayer.userId });
+    await Queue.findOneAndRemove({ userId: findOpponent.userId });
 
     const firstPlayerVillage = await Village.findOne({
       userId: firstPlayer.userId,
@@ -163,12 +163,12 @@ const matchUsersInQueue = async (userId) => {
     findOpponentVillage.units = updateUnitsfindOpponent;
     await findOpponentVillage.save();
 
-    return {status: 200, battle};
-  } else return {status: 400, msg: "No opponent found yet!"};
+    return { status: 200, battle };
+  } else return { status: 400, msg: "No opponent found yet!" };
 };
 
 const cancelQueue = async (userId) => {
-  const user = await User.findOne({_id: userId});
+  const user = await User.findOne({ _id: userId });
   if (!user) {
     return {
       status: 400,
@@ -176,14 +176,14 @@ const cancelQueue = async (userId) => {
     };
   }
 
-  const findInQueue = await Queue.findOneAndRemove({userId: userId});
+  const findInQueue = await Queue.findOneAndRemove({ userId: userId });
   if (!findInQueue)
     return {
       status: 400,
       msg: `This user is not in queue`,
     };
 
-  const village = await Village.findOne({userId: userId});
+  const village = await Village.findOne({ userId: userId });
 
   const updateUnits = village.units.map((villageUnit) => {
     const foundUnit = findInQueue.unitsInQueue.find((fightUnit) => {
@@ -207,9 +207,9 @@ const cancelQueue = async (userId) => {
 
   return {
     status: 200,
-    msg: `Removed user from queue and returned units to village!`,
+    msg: `Removed user from queue!`,
     updateUnits,
   };
 };
 
-export {addUserToQueue, matchUsersInQueue, cancelQueue};
+export { addUserToQueue, matchUsersInQueue, cancelQueue };
