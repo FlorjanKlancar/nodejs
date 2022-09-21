@@ -205,7 +205,7 @@ const cancelQueue = async (userId) => {
 
   return {
     status: 200,
-    msg: `Removed user from queue and returned units to village!`,
+    msg: `Removed user from queue!`,
     updateUnits,
   };
 };
