@@ -61,32 +61,36 @@ start();
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "https://dem-mongo.vercel.app",
+    origin: "http://localhost:3000",
   },
 });
 io.on("connection", (socket) => {
   console.log("client connected: ", socket.id);
 
   socket.on("disconnect", (reason) => {
-    console.log(reason);
+    console.log("disconnect", reason);
   });
 
   socket.on("addUserToQueue", async ({ userId, selectedSquad }) => {
     console.log("socket", socket.id);
     const response = await addUserToQueue(userId, selectedSquad, socket.id);
 
+    socket.emit("queueResponse", { response });
     if (response.status === 200) {
-      socket.emit("queueResponse", { response });
       const battleResponse = await matchUsersInQueue(response.userId);
 
       if (battleResponse.status === 200) {
-        socket.emit("battleResponse", { response: battleResponse.battle });
-        socket
-          .to(battleResponse.battle.playerTwoSocketId)
-          .emit("battleResponse", { response: battleResponse.battle });
+        setTimeout(() => {
+          socket.emit("matchFoundWaitingForAccept", {
+            response: battleResponse.battle,
+          });
+          socket
+            .to(battleResponse.battle.playerTwoSocketId)
+            .emit("matchFoundWaitingForAccept", {
+              response: battleResponse.battle,
+            });
+        }, 1500);
       }
-    } else {
-      socket.emit("queueResponse", { response });
     }
   });
 
@@ -94,5 +98,11 @@ io.on("connection", (socket) => {
     const response = await cancelQueue(userId);
 
     socket.emit("cancelResponse", { response });
+  });
+
+  socket.on("matchAccepted", async ({ sessionId: userId, battleInfo }) => {
+    console.log("test", userId, battleInfo);
+    const response = await confirmBattle(userId, battleInfo);
+    //search for match document, check which user accepted and time passed if all true make socket room and return some code
   });
 });
