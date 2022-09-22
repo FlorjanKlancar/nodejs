@@ -104,8 +104,19 @@ io.on("connection", (socket) => {
   socket.on("matchAccepted", async ({ sessionId: userId, battleInfo }) => {
     const response = await confirmBattle(userId, battleInfo);
 
+    console.log({ response });
+    if (response.status === 200) {
+      socket.emit("matchAcceptedByUser", {
+        response: response.msg,
+      });
+    }
+
     if (response.status === 201) {
-      //CREATE ROOM AND JOIN TWO SOCKET IDS
+      io.emit("matchCreated", {
+        response: response.msg,
+      });
+
+      //this is not good, it sends the msg to all clients - correct way:CREATE ROOM AND JOIN TWO SOCKET IDS send them msg
     }
   });
 });

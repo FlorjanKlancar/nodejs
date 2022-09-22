@@ -76,10 +76,13 @@ const confirmBattle = async (userId, battleInfo) => {
   };
 
   if (
-    !checkUpdatedDocument.playerOneAccepted &&
-    checkUpdatedDocument.playerTwoAccepted
+    !checkUpdatedDocument.playerOneAccepted ||
+    !checkUpdatedDocument.playerTwoAccepted
   )
-    return { status: 200, msg: "Updated Battle document waiting for opponent" };
+    return {
+      status: 200,
+      msg: "Match has been accepted by you. Waiting for opponent!",
+    };
   else
     return {
       status: 201,
