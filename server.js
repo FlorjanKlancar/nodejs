@@ -1,8 +1,7 @@
 import express from "express";
 import cors from "cors";
 import "express-async-errors";
-import errorHandlerMiddleware from "./middleware/error-handler.js";
-import notFoundMiddleware from "./middleware/not-found.js";
+
 import dotenv from "dotenv";
 import gsBuildingsRouter from "./routes/gsBuildingsRoutes.js";
 import initRouter from "./routes/initRoutes.js";
@@ -41,9 +40,6 @@ app.use("/api/init", initRouter);
 app.use("/api/statistics", statisticRouter);
 app.use("/api/user", userInfoRouter);
 app.use("/api/battle", battleRouter);
-
-app.use(notFoundMiddleware);
-app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 5000;
 
