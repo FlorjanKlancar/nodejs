@@ -105,6 +105,9 @@ const matchUsersInQueue = async (userId) => {
 
       playerOneSocketId: firstPlayer.socketId,
       playerTwoSocketId: findOpponent.socketId,
+
+      playerOneAccepted: false,
+      playerTwoAccepted: false,
     });
 
     await battle.save();

@@ -20,6 +20,7 @@ import {
   matchUsersInQueue,
 } from "./controllers/queueController.js";
 import battleRouter from "./routes/battleRoutes.js";
+import { confirmBattle } from "./controllers/battlesController.js";
 
 dotenv.config();
 
@@ -101,8 +102,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("matchAccepted", async ({ sessionId: userId, battleInfo }) => {
-    console.log("test", userId, battleInfo);
     const response = await confirmBattle(userId, battleInfo);
-    //search for match document, check which user accepted and time passed if all true make socket room and return some code
+
+    if (response.status === 201) {
+      //CREATE ROOM AND JOIN TWO SOCKET IDS
+    }
   });
 });
