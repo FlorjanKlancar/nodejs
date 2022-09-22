@@ -62,7 +62,7 @@ start();
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://dem-mongo.vercel.app",
   },
 });
 io.on("connection", (socket) => {
